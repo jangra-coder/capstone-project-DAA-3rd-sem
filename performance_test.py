@@ -1,10 +1,12 @@
 # performance_test.py
-# Phase 4 : runs the planner on small and bigger random datasets and records
-# the time taken by each major step. At the end it draws the runtime chart.
+# phase 4 - runs the program on small and big random data, notes the time of
+# each step and then makes the runtime chart
 
 import os
 import random
 import time
+
+import matplotlib.pyplot as plt
 
 from sorting import merge_sort
 from knapsack import knapsack
@@ -47,13 +49,6 @@ def run_once(parcels, graph, capacity):
 
 
 def draw_chart(results, filename):
-    try:
-        import matplotlib.pyplot as plt
-    except ImportError:
-        print("matplotlib is not installed, so the chart is not made.")
-        print("Install it using : pip install matplotlib")
-        return
-
     sizes = []
     for r in results:
         sizes.append(r["parcels"])

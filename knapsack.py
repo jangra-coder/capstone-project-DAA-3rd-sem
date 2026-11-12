@@ -1,8 +1,6 @@
 # knapsack.py
-# 0/1 Knapsack using Dynamic Programming.
-# weight of item = weight of parcel (kg)
-# value of item  = priority of parcel
-# capacity       = how much weight the van can carry in one trip
+# 0/1 Knapsack using DP
+# here weight = parcel weight (kg), value = parcel priority, capacity = van capacity
 
 
 def knapsack(parcels, capacity):

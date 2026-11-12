@@ -7,92 +7,86 @@ Faculty: Dr. Shweta Agarwal
 
 ## About
 
-A small courier planning system made in Python. It takes a list of parcels and a road map
-of delivery points and gives two things:
+This is my capstone project for DAA. It is a small courier planner made in Python.
+We give it a list of parcels and a road map, and it tells two things -
 
-- **Packing plan** - which parcels should go in the van for one trip
-- **Delivery route** - in which order the van should visit the delivery points
+- which parcels should be loaded in the van for one trip (packing plan)
+- in which order the van should go to the delivery points (delivery route)
 
-It uses the algorithms done in the lab assessments : Merge Sort, 0/1 Knapsack (Dynamic Programming),
-Dijkstra's Algorithm and Nearest Neighbour (TSP approximation).
+I have used the algorithms from the lab assessments - Merge Sort, 0/1 Knapsack (DP),
+Dijkstra and Nearest Neighbour (approximation for TSP).
 
-All the algorithms are written by hand. Only Python built-in modules are used,
-`matplotlib` is used only for the runtime chart.
+No library is used for the algorithms, only Python built-in modules.
+matplotlib is used only to make the runtime chart.
 
 ## Project Structure
 
 ```
-main.py              -> main program, runs all the steps one by one
-sorting.py           -> merge sort for parcels
-knapsack.py          -> 0/1 knapsack (DP) and printing of the DP table
-route.py             -> graph, dijkstra, path and nearest neighbour route
-generate_data.py     -> makes random parcels and roads for bigger tests
-test_cases.py        -> test cases to check that the output is correct
-performance_test.py  -> runtime of each step on small and big data + chart
-data/                -> sample datasets (csv files)
+main.py              -> main file, runs all the steps
+sorting.py           -> merge sort
+knapsack.py          -> 0/1 knapsack using DP
+route.py             -> graph, dijkstra and nearest neighbour route
+generate_data.py     -> makes random data for bigger tests
+test_cases.py        -> test cases
+performance_test.py  -> runtime test + chart
+data/                -> csv files (sample data)
 results/             -> runtime chart
-screenshots/         -> screenshots of the output
+screenshots/         -> output screenshots
 ```
 
 ## How to Run
 
-Python 3 is needed. Install matplotlib once (only needed for the chart):
+Install matplotlib first (only needed for the chart)
 
 ```
 pip install matplotlib
 ```
 
-1. Run the planner on the small sample data (van capacity 20 kg):
+Run with the small sample data (van capacity is 20 kg)
 
 ```
 python main.py
 ```
 
-2. Run it on any other dataset (parcels file, roads file, van capacity):
+For any other data give the parcels file, roads file and van capacity
 
 ```
 python main.py data/parcels_medium.csv data/roads_medium.csv 60
 ```
 
-3. Run the test cases:
+Test cases
 
 ```
 python test_cases.py
 ```
 
-4. Run the performance test (it also saves `results/runtime_chart.png`):
+Performance test (chart gets saved in the results folder)
 
 ```
 python performance_test.py
 ```
 
-To make a new random medium dataset : `python generate_data.py`
+`python generate_data.py` makes a new random medium dataset.
 
----
-
-## Phase 1 – Courier Problem Design and Planning
+## Phase 1 - Courier Problem Design and Planning
 
 ### Problem
 
-The courier depot has many parcels, but the van can carry only a limited weight in one trip.
-So the system has to:
+There are many parcels in the depot but the van can carry only limited weight in one trip.
+So first we have to see which parcels are urgent, then select the best parcels which can fit
+in the van, and then find a short route to deliver them and come back to the depot.
 
-1. find which parcels are more urgent (sorting)
-2. choose the best parcels that fit in the van (knapsack)
-3. find the shortest roads between the delivery points (dijkstra)
-4. make a short route that visits all the chosen points and comes back to the depot (nearest neighbour)
+### Parcel details
 
-### Parcel attributes
+| Field | Meaning | Example |
+|---|---|---|
+| parcel_id | parcel number | P1 |
+| destination | delivery point | C |
+| weight | weight in kg | 6 |
+| priority | 1 to 10 (10 = most important) | 8 |
+| deadline | has to be delivered within these many hours | 2 |
 
-| Field       | Meaning                                              | Example |
-|-------------|------------------------------------------------------|---------|
-| parcel_id   | id of the parcel                                     | P1      |
-| destination | delivery point of the parcel                         | C       |
-| weight      | weight in kg (whole number)                          | 6       |
-| priority    | how important the parcel is, 1 (low) to 10 (high)    | 8       |
-| deadline    | parcel must be delivered within these many hours     | 2       |
-
-Parcels file (`data/parcels_small.csv`):
+Parcels file (data/parcels_small.csv) -
 
 ```
 parcel_id,destination,weight,priority,deadline
@@ -102,22 +96,22 @@ P3,E,9,9,3
 ...
 ```
 
-### Delivery points and graph format
+### Delivery points and graph
 
-- The starting point is always called `Depot`. Delivery points are A to F in the small data
-  and C1, C2 ... in the random data.
-- Roads file has `from,to,distance` (distance in km). Roads are two way, so the map is an
-  **undirected weighted graph**.
-- In the program the graph is stored as an **adjacency list** (dictionary of lists):
+The van always starts from `Depot`. In the small data the delivery points are A to F,
+and in the random data they are C1, C2 and so on.
+
+Roads are given in a csv file as `from,to,distance` (distance in km). All roads are two way
+so the map is an undirected weighted graph.
+
+I have stored the graph as an adjacency list (dictionary). Every place has only a few roads,
+so it takes less memory than a matrix and in dijkstra we can directly loop over the neighbours.
 
 ```
 graph["A"] = [("Depot", 4), ("B", 1), ("C", 5)]
 ```
 
-Adjacency list is used because every place has only a few roads, so it takes less memory than
-an adjacency matrix, and dijkstra can directly go through the neighbours of a place.
-
-Roads file (`data/roads_small.csv`):
+Roads file (data/roads_small.csv) -
 
 ```
 from,to,distance
@@ -134,53 +128,60 @@ D,F,6
 E,F,3
 ```
 
-### Algorithms selected
+### Algorithms used
 
-| Step           | Algorithm         | Why this one | Time | Space |
-|----------------|-------------------|--------------|------|-------|
-| Sort parcels   | Merge Sort        | always O(n log n) (quick sort can become O(n²)) and it is stable, so parcels with same deadline and priority keep their order | O(n log n) | O(n) |
-| Fill the van   | 0/1 Knapsack (DP) | a parcel can't be cut, so greedy does not always give the best answer. DP gives the best answer without trying all 2^n groups | O(n × W) | O(n × W) |
-| Shortest paths | Dijkstra          | all road distances are positive, and it gives the shortest distance from one place to all places | O(V²) for one source | O(V) |
-| Delivery route | Nearest Neighbour | finding the best route (TSP) is NP-hard, k stops have k! orders. Nearest neighbour gives a good route very fast | O(k²) | O(k) |
+| Step | Algorithm | Time | Space |
+|---|---|---|---|
+| Sort the parcels | Merge Sort | O(n log n) | O(n) |
+| Select parcels for the van | 0/1 Knapsack (DP) | O(n x W) | O(n x W) |
+| Shortest paths | Dijkstra | O(V^2) for one source | O(V) |
+| Delivery route | Nearest Neighbour | O(k^2) | O(k) |
 
-n = number of parcels, W = van capacity, V = places in the map, k = stops in the route
+n = no. of parcels, W = van capacity, V = no. of places, k = no. of stops
 
-Dijkstra is run from the Depot and from every stop (k + 1 times), so the full dijkstra step is O(k × V²).
+Why I used these -
 
-### Design (how the steps work together)
+- Merge sort is O(n log n) in every case (quick sort can go to O(n^2) in worst case).
+  It is also stable, so if two parcels have same deadline and priority, their order does not change.
+- In 0/1 knapsack a parcel can't be broken, we take it fully or leave it. Greedy does not
+  always give the best answer here (example is in phase 2), DP gives the best answer.
+- Road distances are never negative and we need the shortest distance from one place to all
+  other places, so dijkstra is fine for this.
+- Finding the exact best route (TSP) is NP-hard, for k stops there are k! orders to check.
+  Nearest neighbour gives a good route very fast, that's why I used it.
+
+Dijkstra runs from the Depot and from every stop, so the full dijkstra part is O(k x V^2).
+
+### Design
 
 ```
-   parcels.csv                                roads.csv
-        |                                         |
-        v                                         v
-   Merge Sort                               Build graph
-   (deadline, then priority)                (adjacency list)
-        |                                         |
-        v                                         |
-   0/1 Knapsack (DP) ---> packing plan            |
-        |                                         |
-        | delivery points of selected parcels     |
-        v                                         v
-        +----------> Dijkstra (from Depot and every stop)
-                                |
-                                v
-                     Nearest Neighbour route
-                                |
-                                v
-                  final route + total distance
+parcels.csv                          roads.csv
+     |                                   |
+     v                                   v
+Merge Sort                          make graph
+(deadline, then priority)           (adjacency list)
+     |                                   |
+     v                                   |
+0/1 Knapsack DP --> packing plan         |
+     |                                   |
+     | delivery points of                |
+     | selected parcels                  v
+     +------------------------> Dijkstra (from Depot and every stop)
+                                         |
+                                         v
+                                Nearest Neighbour route
+                                         |
+                                         v
+                                final route + total km
 ```
 
-Why sorting is done before knapsack : the parcels go into the DP table in deadline order.
-While going back in the DP table (from the last parcel to the first), a parcel is left out
-whenever the same total priority can be made without it. So if two groups of parcels give the
-same total priority, the parcels with earlier deadline are kept. The packing plan is also
-shown in deadline order.
+Sorting is done before knapsack so that the packing plan comes in deadline order. Also if two
+groups of parcels give the same total priority, the DP keeps the parcels with earlier deadline,
+because while going back in the table it leaves out the later parcels first.
 
----
+## Phase 2 - Package Prioritization and Box Filling
 
-## Phase 2 – Package Prioritization and Box Filling
-
-Output of `python main.py` (small data, capacity 20 kg):
+Output of `python main.py` -
 
 ```
 ============================================================
@@ -239,22 +240,19 @@ Total priority     : 29
 Left for next trip : P3, P10, P6, P9, P8
 ```
 
-- Sorting : P5 has the earliest deadline (1 hour) so it comes first. P1 and P7 both have
-  deadline 2, so P1 comes first because of higher priority. P2 and P10 have the same deadline
-  and same priority, so they stay in the same order as in the file (merge sort is stable).
-- How to read the DP table : row P7 and column 15 is 21. It means using only the first three
-  parcels (P5, P1, P7) with 15 kg space, the best total priority is 21 (7 + 8 + 6).
+- P5 has the earliest deadline (1 hour) so it comes first. P1 and P7 both have deadline 2,
+  P1 comes first because its priority is more (8 > 6). P2 and P10 have same deadline and same
+  priority so they stay in the same order as in the file (merge sort is stable).
+- In the DP table, row P7 and column 15 is 21. It means if we use only the first three parcels
+  (P5, P1, P7) and have 15 kg space, the best total priority is 21 (7 + 8 + 6).
   The last cell (29) is the final answer.
-- The van takes P5, P1, P7, P2, P4 = 20 kg (full) with total priority 29.
-- If we fill the van greedily (highest priority first) we get P3, P1, P5 = only 24 priority.
-  P3 has high priority (9) but it is heavy (9 kg), and the best group with P3 gives only 26.
-  So greedy is not correct for 0/1 knapsack and DP is needed.
+- So the van takes P5, P1, P7, P2 and P4. Total weight is 20 kg (van is full) and total priority is 29.
+- If we do it greedy (take highest priority first) we get P3, P1, P5 = only 24. P3 has priority 9
+  but it is 9 kg, and the best we can get with P3 is 26. So greedy fails here and DP is needed.
 
----
+## Phase 3 - Route Maker and Graph Processing
 
-## Phase 3 – Route Maker and Graph Processing
-
-Output of `python main.py` (continued):
+Output of `python main.py` (continued) -
 
 ```
 ------------------------------------------------------------
@@ -293,31 +291,29 @@ Full road path     : Depot -> B -> A -> C -> E -> F -> E -> C -> A -> B -> Depot
 Total route length : 26 km
 ```
 
-- Dijkstra finds that going to A through B (2 + 1 = 3 km) is shorter than the direct road (4 km).
-- Stops are the delivery points of the selected parcels. A has two parcels (P7, P2) but it is
-  visited only once.
+- Depot to A direct road is 4 km but dijkstra found Depot -> B -> A which is only 3 km.
+- A has two parcels (P7 and P2) but A is visited only once.
 
-How the nearest neighbour route is made (distances are the dijkstra shortest distances):
+How nearest neighbour made the route (using the dijkstra distances) -
 
-| Now at | Not visited stops (km)    | Nearest | km |
-|--------|---------------------------|---------|----|
-| Depot  | B 2, A 3, C 8, F 13       | B       | 2  |
-| B      | A 1, C 6, F 11            | A       | 1  |
-| A      | C 5, F 10                 | C       | 5  |
-| C      | F 5                       | F       | 5  |
-| F      | all visited, go to Depot  | Depot   | 13 |
-|        |                           | **Total** | **26** |
+```
+At Depot : B = 2, A = 3, C = 8, F = 13   -> go to B (2 km)
+At B     : A = 1, C = 6, F = 11          -> go to A (1 km)
+At A     : C = 5, F = 10                 -> go to C (5 km)
+At C     : F = 5                         -> go to F (5 km)
+At F     : all stops done                -> back to Depot (13 km)
 
-For this small data, 26 km is also the best possible route (checked in `test_cases.py` by
-trying every order of the stops).
+Total = 2 + 1 + 5 + 5 + 13 = 26 km
+```
 
----
+For this small data 26 km is also the best route possible. This is checked in test_cases.py
+by trying all the orders.
 
-## Phase 4 – Performance Testing and Optimization
+## Phase 4 - Performance Testing and Optimization
 
 ### Test cases
 
-Output of `python test_cases.py`:
+Output of `python test_cases.py` -
 
 ```
 ============================================================
@@ -343,9 +339,9 @@ Best possible route     : 95 km   (time 4144.6 ms, tried every order)
 Nearest neighbour is 10.5% longer than the best route
 ```
 
-### Runtime of major steps
+### Runtime
 
-Output of `python performance_test.py` (average of 3 runs, time in milliseconds):
+performance_test.py runs every size 3 times and takes the average (time is in ms) -
 
 ```
 Parcels  Points  Capacity  Sorting   Knapsack   Dijkstra   NN-TSP   Total
@@ -366,84 +362,77 @@ Parcels  Roads   Picked   Stops   Route length
 
 ![Runtime chart](results/runtime_chart.png)
 
-### Comparison of the steps
+### What I observed
 
-- **Knapsack** takes the most time. It fills a table of (n + 1) × (W + 1) cells, and in this
-  test both n and W become 10 times bigger (from 100 to 1000), so the time becomes about 100 times more.
-- **Dijkstra** is second. One run is O(V²) and it runs once for every stop, so it grows fast
-  when the map has more points (100 points and 96 stops in the last test).
-- **Merge Sort** stays small (about 2 ms for 1000 parcels) because n log n grows slowly.
-- **Nearest Neighbour** is the fastest (less than 1 ms), it only compares distances (k² work).
-  Trying every order for just 10 stops took a few seconds (10! = 3628800 orders), so the
-  exact TSP answer is not practical when stops increase.
-- Nearest neighbour does not always give the best route. In the medium data it gave 105 km
-  but the best route is 95 km (10.5% longer), because it only looks at the next nearest stop.
+- Knapsack takes the most time. The DP table is (n+1) x (W+1) and in this test both n and W
+  became 10 times (100 to 1000), so the time became around 100 times.
+- Dijkstra is second. One dijkstra is O(V^2) and it runs for every stop. In the last test
+  there are 100 points and 96 stops.
+- Merge sort is very fast, only around 2 ms for 1000 parcels, because n log n grows slowly.
+- Nearest neighbour is the fastest, less than 1 ms. But trying all orders for only 10 stops
+  took a few seconds (10! = 3628800 orders), so the exact TSP is not possible for big inputs.
+- Nearest neighbour is not always the best route. In the medium data it gave 105 km but the
+  best is 95 km (10.5% more), because it only checks the nearest next stop.
 
-### Optimization ideas (for future)
+### Improvements (future work)
 
-1. **Dijkstra with a min-heap** (`heapq`) - picking the closest place becomes O(log V) instead of O(V),
-   so one run becomes O((V + E) log V). This will help a lot for big road maps.
-2. **Knapsack with a 1-D array** - only the previous row is needed, so memory can be O(W)
-   instead of O(n × W) (a small extra table is needed to find which parcels were taken).
-3. **Improve the route with 2-opt** - after nearest neighbour, reverse a part of the route if it
-   makes the route shorter. This can reduce the extra 10.5% distance.
-4. **Use distance in knapsack** - knapsack only looks at weight and priority. In the medium data
-   it picks P2 (priority 1) only to fill the last 1 kg, and the van has to go to C4 for it
-   (27 km leg). Distance or delivery cost can be added to the value of a parcel.
-5. **Deadlines in the route** - the route is made only by distance, deadlines can also be checked
-   while choosing the next stop.
-6. **More than one trip** - run knapsack again on the parcels left for the next trip.
+- Dijkstra can be done with a min heap (heapq). Then it becomes O((V + E) log V) which is
+  much better for big maps.
+- Knapsack can use only one row (1D array) to save memory, O(W) instead of O(n x W). But then
+  some other way is needed to find which parcels were taken.
+- The nearest neighbour route can be improved using 2-opt (reverse some part of the route if
+  the route becomes shorter).
+- Knapsack only checks weight and priority, not distance. In the medium data it took P2
+  (priority 1) just to fill the last 1 kg and the van had to go to C4 only for it (27 km leg).
+  Distance can also be added in the value.
+- The route is made only by distance. Deadlines can also be checked while choosing the next stop.
+- The parcels left can be planned for the next trip by running knapsack again.
 
----
+## Phase 5 - Result and Demonstration
 
-## Phase 5 – Result and Demonstration
+### Result (small data)
 
-### Final result (small data)
+- Parcels in depot : 10
+- Van capacity : 20 kg
+- Selected parcels : P5, P1, P7, P2, P4
+- Weight used : 20 / 20 kg
+- Total priority : 29
+- Route : Depot -> B -> A -> C -> F -> Depot
+- Total distance : 26 km
 
-| Item             | Result                          |
-|------------------|---------------------------------|
-| Parcels in depot | 10                              |
-| Van capacity     | 20 kg                           |
-| Parcels selected | 5 (P5, P1, P7, P2, P4)          |
-| Weight used      | 20 / 20 kg                      |
-| Total priority   | 29                              |
-| Route            | Depot -> B -> A -> C -> F -> Depot |
-| Total distance   | 26 km                           |
+The most urgent parcel (P5) is selected and the van is fully used. DP gave 29 priority but
+greedy gives only 24. In the route the van first covers the near places B, A and C, and then
+goes to F which is the farthest (13 km from depot). That's why the last leg back to the depot
+is the longest.
 
-The most urgent parcel P5 (deadline 1 hour) is in the van and the van is fully used. DP chose
-the group with the highest total priority, which is better than the greedy choice (29 vs 24).
-The route first goes to the closest stops (B, A, C) and then to F, which is the farthest point
-(13 km from the Depot), so the way back from F is the longest part of the route.
-
-The program also works for any other data in the same csv format, for example the medium data
-(40 parcels, 12 delivery points, capacity 60 kg) gives 14 parcels with total priority 97 and
-a route of 105 km.
+It works for other data also if the csv format is same. For the medium data (40 parcels,
+12 delivery points, 60 kg) it selects 14 parcels with total priority 97 and the route is 105 km.
 
 ### Screenshots
 
-Small data - sorting, DP table and packing plan
+Sorting, DP table and packing plan (small data)
 
-![Sorting and knapsack](screenshots/phase2_sorting_knapsack.png)
+![](screenshots/phase2_sorting_knapsack.png)
 
-Small data - graph, shortest paths and route
+Graph, shortest paths and route (small data)
 
-![Route](screenshots/phase3_route.png)
+![](screenshots/phase3_route.png)
 
 Medium data
 
-![Medium data](screenshots/medium_dataset.png)
+![](screenshots/medium_dataset.png)
 
 Test cases
 
-![Test cases](screenshots/test_cases.png)
+![](screenshots/test_cases.png)
 
 Performance test
 
-![Performance test](screenshots/performance_test.png)
+![](screenshots/performance_test.png)
 
 ### Conclusion
 
-This project joins four algorithms in one system. Merge sort finds the urgent parcels, 0/1 knapsack
-(DP) fills the van in the best way, Dijkstra finds the shortest roads and nearest neighbour makes the
-full route. Exact algorithms are used where they are fast enough, and an approximation is used for
-the route because the exact TSP answer takes too much time when the number of stops increases.
+In this project four algorithms are used together in one program - merge sort for finding the
+urgent parcels, knapsack DP for filling the van, dijkstra for the shortest roads and nearest
+neighbour for the final route. From the runtime test it is clear that exact methods like trying
+all the routes become too slow when the input grows, so approximation is used for the route.
