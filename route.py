@@ -1,9 +1,5 @@
 # route.py
-# Graph part of the project.
-# build_graph             -> makes adjacency list from the list of roads
-# dijkstra                -> shortest distance from one place to all other places
-# get_path                -> gives the actual path (list of places) using previous[]
-# nearest_neighbour_route -> TSP approximation for the full delivery route
+# graph part - making the graph, dijkstra, getting the path and nearest neighbour route
 
 INF = float("inf")
 
