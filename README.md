@@ -5,6 +5,8 @@ Rahul (2501350043) - DAA
 Course: Design & Analysis of Algorithms (ETCCDA302)
 Faculty: Dr. Shweta Agarwal
 
+Report (PDF) : [DAA_Capstone_Report.pdf](DAA_Capstone_Report.pdf)
+
 ## About
 
 This is my capstone project for DAA. It is a small courier planner made in Python.
@@ -32,6 +34,7 @@ performance_test.py  -> runtime test + chart
 data/                -> csv files (sample data)
 results/             -> runtime chart
 screenshots/         -> output screenshots
+DAA_Capstone_Report.pdf -> final report
 ```
 
 ## How to Run
