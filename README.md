@@ -3,7 +3,7 @@
 Rahul (2501350043) - DAA
 
 Course: Design & Analysis of Algorithms (ETCCDA302)
-Faculty: Dr. Shweta Agarwal
+Instructor: Anjali Pal
 
 Report (PDF) : [DAA_Capstone_Report.pdf](DAA_Capstone_Report.pdf)
 
